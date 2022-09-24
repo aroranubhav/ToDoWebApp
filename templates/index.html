@@ -68,7 +68,7 @@
             .catch(function(){
                 document.getElementById('error').className = '';
                 console.log('An error occured');
-            })
+            });
         }
 
         const checkboxes = document.querySelectorAll('.checked-state');
@@ -79,6 +79,7 @@
                 const completedState = e.target.checked;
                 const todoId = e.target.dataset['id'];
                 console.log(todoId);
+
                 fetch('/todos/' + todoId + '/set-completed', {
                     method : 'POST',
                     body : JSON.stringify({
@@ -94,7 +95,29 @@
                 .catch(function() {
                     console.log('An error occured!');
                     document.getElementById('error').className = '';
+                });
+            }
+        }
+
+        const deleteButtons = document.querySelectorAll('.delete-button');
+        for (let i = 0; i < deleteButtons.length; i++) {
+            const deleteButton = deleteButtons[i];
+            deleteButton.onclick = function(e) {
+                console.log(event, e);
+                const todoId = e.target.dataset['id'];
+
+                fetch('/todos/' + todoId + '/delete', {
+                    method : 'DELETE',
                 })
+                .then(function(response) {
+                    document.getElementById('error').className = 'hidden';
+                    console.log('Success', response);
+                    window.location.href = '/';
+                })
+                .catch(function() {
+                    console.log('Error', response);
+                    document.getElementById('error').className = '';
+                });
             }
         }
     </script>

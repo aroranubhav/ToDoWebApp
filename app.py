@@ -1,3 +1,4 @@
+import json
 from flask import Flask, jsonify, render_template, request, redirect, url_for, abort
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import false
@@ -61,6 +62,20 @@ def set_completed_todo(todo_id):
         db.session.close()
     
     return redirect(url_for('index'))
+
+@app.route('/todos/<todo_id>/delete', methods = ['DELETE'])
+def delete_todo(todo_id):
+    try:
+        todo = ToDo.query.get(todo_id)
+        db.session.delete(todo)
+        db.session.commit()
+    except:
+        print(sys.exc_info())
+        db.session.rollback()
+    finally:
+        db.session.close()
+
+    return jsonify({'success' : True})
 
 
 if __name__ == '__main__':
