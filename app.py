@@ -46,6 +46,22 @@ def create_todo():
     else:
         return jsonify(body)
 
+@app.route('/todos/<todo_id>/set-completed', methods = ['POST'])
+def set_completed_todo(todo_id):
+    try:
+        completed_state = request.get_json()['completed']
+        print(todo_id)
+        todo = ToDo.query.get(todo_id)
+        todo.completed = completed_state
+        db.session.commit()
+    except:
+        print(sys.exc_info())
+        db.session.rollback()
+    finally:
+        db.session.close()
+    
+    return redirect(url_for('index'))
+
 
 if __name__ == '__main__':
     app.run(debug = True, port = 5000)
