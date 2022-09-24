@@ -1,4 +1,3 @@
-from asyncio import constants
 from flask import Flask, jsonify, render_template, request, redirect, url_for, abort
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import false
