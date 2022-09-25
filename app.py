@@ -17,9 +17,19 @@ class ToDo(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     description = db.Column(db.String(), nullable = False)
     completed = db.Column(db.Boolean, nullable = False, default = False)
+    list_id = db.Column(db.Integer, db.ForeignKey('todoslists.id'), nullable = False)
 
     def __repr__(self) -> str:
         return f'<ToDo: {self.id} {self.description} {self.completed}>'
+
+class ToDoList(db.Model):
+    __tablename__ = 'todoslists'
+    id = db.Column(db.Integer, primary_key = True)
+    todo_category = db.Column(db.String(), nullable = False)
+    todos = db.relationship('Todo', backref = 'list', lazy = True)
+
+    def __repr__(self) -> str:
+        return f'<ToDoList {self.id} {self.todo_category}>'
 
 @app.route('/')
 def index(): #route handler
