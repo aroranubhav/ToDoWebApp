@@ -37,7 +37,10 @@ def index(): #route handler
 
 @app.route('/lists/<list_id>')
 def get_category_todos(list_id):
-    return render_template('index.html', todos = ToDo.query.filter_by(todo_category_id = list_id).order_by('id').all())
+    return render_template('index.html',
+    list = ToDoList.query.all(),
+    active_list = ToDoList.query.get(list_id),
+    todos = ToDo.query.filter_by(todo_category_id = list_id).order_by('id').all())
 
 @app.route('/todos/create', methods = ['POST'])
 def create_todo():

@@ -3,28 +3,64 @@
 <head>
     <title>ToDo Web App</title>
     <style>
-        .hidden {
+    .hidden {
         display: none;
+    }
+    ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        width: 300px;
+    }
+    li {
+        clear: both;
+    }
+    li button {
+        -webkit-appearance: none;
+        border: none;
+        outline: none;
+        color: red;
+    }
+    .category-wrapper, .todos-wrapper {
+        display: inline-block;
+        vertical-align: top;
     }
     </style>
 </head>
-<body>
-    <form id="form">
-        <input type="text" name="description" id="description">
-        <input type="submit" value="Add ToDo">
-    </form>
 
-    <div id="error" class="hidden">Something went wrong!</div>
+<body>
+
+    <div class="category-wrapper">
+        <ul id = "category-list">
+            {% for item in list %}
+            <li>
+                <a href="/lists/{{ item.id }}">
+                    {{ item.todo_category }}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="todos-wrapper">
+        <h4>{{ active_list.todo_category }}</h4>
+        <form id="form">
+            <input type="text" name="description" id="description">
+            <input type="submit" value="Add ToDo">
+        </form>
     
-    <ul id="todos-list">
-        {% for todo in todos %}
-        <li>
-            <input class="checked-state" data-id="{{ todo.id }}" type="checkbox" {% if todo.completed %} checked {% endif %}/>
-            {{ todo.description }}
-            <button class="delete-button" data-id="{{ todo.id }}">&cross;</button>
-        </li>
-        {% endfor %}
-    </ul>
+        <div id="error" class="hidden">Something went wrong!</div>
+        
+        <ul id="todos-list">
+            {% for todo in todos %}
+            <li>
+                <input class="checked-state" data-id="{{ todo.id }}" type="checkbox" {% if todo.completed %} checked {% endif %}/>
+                {{ todo.description }}
+                <button class="delete-button" data-id="{{ todo.id }}">&cross;</button>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
     <script>
         const descInput = document.getElementById('description');
         document.getElementById('form').onsubmit = function(e) {
