@@ -17,7 +17,7 @@ class ToDo(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     description = db.Column(db.String(), nullable = False)
     completed = db.Column(db.Boolean, nullable = False, default = False)
-    list_id = db.Column(db.Integer, db.ForeignKey('todoslists.id'), nullable = False)
+    todo_category_id = db.Column(db.Integer, db.ForeignKey('todoslists.id'), nullable = False)
 
     def __repr__(self) -> str:
         return f'<ToDo: {self.id} {self.description} {self.completed}>'
@@ -26,14 +26,18 @@ class ToDoList(db.Model):
     __tablename__ = 'todoslists'
     id = db.Column(db.Integer, primary_key = True)
     todo_category = db.Column(db.String(), nullable = False)
-    todos = db.relationship('Todo', backref = 'list', lazy = True)
+    todos = db.relationship('ToDo', backref = 'list', lazy = True)
 
     def __repr__(self) -> str:
         return f'<ToDoList {self.id} {self.todo_category}>'
 
 @app.route('/')
 def index(): #route handler
-    return render_template('index.html', todos = ToDo.query.order_by('id').all())
+    return redirect(url_for('get_category_todos', list_id = 1))
+
+@app.route('/lists/<list_id>')
+def get_category_todos(list_id):
+    return render_template('index.html', todos = ToDo.query.filter_by(todo_category_id = list_id).order_by('id').all())
 
 @app.route('/todos/create', methods = ['POST'])
 def create_todo():
@@ -41,10 +45,12 @@ def create_todo():
     body = {}
     try:
         todo_description = request.get_json()['description']
-        new_todo = ToDo(description = todo_description)
+        new_todo = ToDo(description = todo_description, completed = False)
         db.session.add(new_todo)
         db.session.commit()
-        body['description'] = todo_description
+        body['id'] = new_todo.id
+        body['description'] = new_todo.description
+        body['completed'] = new_todo.completed
     except:
         error = True
         db.session.rollback()
