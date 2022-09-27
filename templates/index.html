@@ -31,12 +31,20 @@
 <body>
 
     <div class="category-wrapper">
+        
+        <form action="/add-todo-category" method="post" id="category-form">
+            <input type="text" name="category" id="category">
+            <input type="submit" value="Add Category">
+        </form>
+
         <ul id = "category-list">
             {% for item in list %}
             <li>
+                <input type="checkbox" class="category-checked-state" data-id="{{ item.id }}"/>
                 <a href="/lists/{{ item.id }}">
                     {{ item.todo_category }}
                 </a>
+                <button class="category-delete-button" data-id="{{ item.id }}">&cross;</button>
             </li>
             {% endfor %}
         </ul>
@@ -62,6 +70,57 @@
     </div>
 
     <script>
+        const categoryInput = document.getElementById('category');
+        document.getElementById('category-form').onsubmit = function(e) {
+            e.preventDefault();
+            const desc = categoryInput.value;
+            categoryInput.value = '';
+            console.log(desc);
+
+            fetch('/add-todo-category', {
+                method : 'POST',
+                body : JSON.stringify({
+                    'todo_category' : desc,
+                }),
+                headers: {
+                    'Content-Type' : 'application/json',
+                }
+            })
+            .then(function(response){
+                return response.json();
+            })
+            .then(function(jsonResponse){
+                console.log(jsonResponse);
+                const li = document.createElement('li');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'category-checked-state';
+                checkbox.setAttribute('data-id', jsonResponse.id);
+                li.appendChild(checkbox);
+
+                const hyperlink = document.createElement('a');
+                hyperlink.setAttribute('href', '/lists/' + jsonResponse.id);
+                hyperlink.innerHTML = jsonResponse.todo_category;
+                li.appendChild(hyperlink);
+
+                const deleteButton = document.createElement('button');
+                deleteButton.className = 'category-delete-button';
+                deleteButton.setAttribute('data-id', jsonResponse.id);
+                deleteButton.innerHTML = '&cross;'
+                li.appendChild(deleteButton);
+                
+                document.getElementById('category-list').appendChild(li);
+                document.getElementById('error').className = 'hidden';
+                console.log(li);
+
+            })
+
+            .catch(function(e){
+                document.getElementById('error').className = '';
+                console.log('An error occured while adding category.');
+            })
+        }
+
         const descInput = document.getElementById('description');
         document.getElementById('form').onsubmit = function(e) {
             e.preventDefault();
@@ -100,6 +159,7 @@
 
                 document.getElementById('todos-list').appendChild(li);
                 document.getElementById('error').className = 'hidden';
+                console.log(li);
             })
             .catch(function(){
                 document.getElementById('error').className = '';

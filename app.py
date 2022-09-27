@@ -1,4 +1,5 @@
 import json
+from urllib import response
 from flask import Flask, jsonify, render_template, request, redirect, url_for, abort
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import false
@@ -27,6 +28,7 @@ class ToDoList(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     todo_category = db.Column(db.String(), nullable = False)
     todos = db.relationship('ToDo', backref = 'list', lazy = True)
+    completed = db.Column(db.Boolean, nullable = False, default = False)
 
     def __repr__(self) -> str:
         return f'<ToDoList {self.id} {self.todo_category}>'
@@ -41,6 +43,31 @@ def get_category_todos(list_id):
     list = ToDoList.query.all(),
     active_list = ToDoList.query.get(list_id),
     todos = ToDo.query.filter_by(todo_category_id = list_id).order_by('id').all())
+
+@app.route('/add-todo-category', methods = ['POST'])
+def add_todo_category():
+    error = False
+    body = {}
+    try:
+        category = request.get_json()['todo_category']
+        new_category = ToDoList(todo_category = category)
+        db.session.add(new_category)
+        db.session.commit()
+        body['id'] = new_category.id
+        body['todo_category'] = new_category.todo_category
+        body['completed'] = False
+    except:
+        error = True
+        db.session.rollback()
+        print(sys.exc_info())
+    finally:
+        db.session.close()
+    
+    if error:
+        abort(400)
+    else:
+        return jsonify(body)
+
 
 @app.route('/todos/create', methods = ['POST'])
 def create_todo():
